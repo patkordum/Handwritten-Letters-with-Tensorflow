@@ -10,14 +10,16 @@ def load_data():
     labels = []
     
     # List all valid single-character folders inside "Letters"
-    folder_list = sorted([f for f in os.listdir("Letters") if len(f) == 1 and os.path.isdir(os.path.join("Letters", f))])
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # Get the directory of get_data.py
+    print(base_dir)
+    folder_list = sorted([f for f in os.listdir(base_dir) if len(f) == 1 and os.path.isdir(os.path.join(base_dir, f))])
     
     if not folder_list:
         print("Error: No valid letter folders found in 'Letters' directory.")
         return None, None
 
     for index, folder in enumerate(folder_list):
-        folder_path = os.path.join("Letters", folder)
+        folder_path = os.path.join(base_dir, folder)
         label = index  # Store index as label
 
         # Get file list
@@ -68,6 +70,6 @@ def load_data():
     # Concatenate all data into single NumPy arrays
     features = np.concatenate(features, axis=0)  # Shape: (Total_N, 28, 28)
     labels = np.concatenate(labels, axis=0)  # Shape: (Total_N, 1)
-
+    print(f"Loaded {features.shape}")
     return features, labels
 
