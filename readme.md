@@ -6,17 +6,15 @@ Installation
 
 1. Voraussetzung
 
-Das Projekt wurde mit Python 3.12.7 getestet. Stelle sicher, dass du diese oder eine kompatible Version installiert hast.
+Das Projekt wurde mit Python 3.12.7 getestet.
 
 2. Klone das Repository
 
 3. Installiere die Abhängigkeiten
 
-Nutze pip, um die benötigten Pakete zu installieren:
-
 pip install -r requirements.txt
 
-Falls Fehler auftreten, stelle sicher, dass du eine virtuelle Umgebung nutzt:
+Nutze eine virtuelle Umgebung für die Installation:
 
 python -m venv venv
 source venv/bin/activate  # Für Linux/macOS
