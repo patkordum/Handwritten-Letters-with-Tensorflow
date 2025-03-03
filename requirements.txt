@@ -1,0 +1,9 @@
+tensorflow==2.18.0
+numpy==1.26.4
+string
+pillow==10.2.0
+tkinter
+matplotlib==3.8.2
+opencv-python==4.9.0.80
+compile_model
+scikit-learn==1.4.1.post1

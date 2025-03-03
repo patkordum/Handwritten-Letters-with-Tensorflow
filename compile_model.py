@@ -13,24 +13,21 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import os
 import string
-import tkinter as tk
-from PIL import Image, ImageDraw
-import matplotlib.pyplot as plt
-from tkinter import messagebox
-import cv2
-
-# Letters A-Z in a list
-letters = list(string.ascii_uppercase)
-
-# Data Augmentation
-datagen = ImageDataGenerator(
-    rotation_range=20, width_shift_range=0.2, height_shift_range=0.2,
-    shear_range=0.2, zoom_range=0.2, horizontal_flip=False, fill_mode="nearest"
-)
 
 MODEL_FILE = "model_kisy.h5"
 
-def load_or_train_model():
+# Letters A-Z in a list
+letters = list(string.ascii_uppercase) 
+
+# Data Augmentation
+datagen = ImageDataGenerator(
+    rotation_range=30, width_shift_range=0.3, height_shift_range=0.3,
+    shear_range=0.3, zoom_range=0.3, horizontal_flip=False, fill_mode="nearest"
+)
+
+
+
+def load_or_train_model(model_selection):
 
 
     if os.path.exists(MODEL_FILE):
@@ -52,6 +49,7 @@ def load_or_train_model():
 
             # Reshape for CNN
         x_train = x_train.reshape(-1, 28, 28, 1)
+        print(x_train[0].shape)
         x_test = x_test.reshape(-1, 28, 28, 1)
 
             # Convert Labels to One-Hot Encoding
@@ -62,41 +60,18 @@ def load_or_train_model():
         # Apply Data Augmentation
         datagen.fit(x_train)
 
-        model = Sequential()
+        # Use specified Model
+        if model_selection=="cnn":
+            model=cnn_model()
 
-        # CNN Model
-        model.add(SeparableConv2D(64, (3, 3), activation=None, padding="same", input_shape=(28, 28, 1)))
-        model.add(BatchNormalization())
-        model.add(LeakyReLU(alpha=0.1))
-        model.add(MaxPool2D(pool_size=(2, 2)))
-
-        model.add(SeparableConv2D(128, (3, 3), activation=None, padding="same",
-                                  depthwise_regularizer=l2(0.001), pointwise_regularizer=l2(0.001)))
-        model.add(BatchNormalization())
-        model.add(LeakyReLU(alpha=0.1))
-        model.add(MaxPool2D(pool_size=(2, 2)))
-
-        model.add(SeparableConv2D(256, (3, 3), activation=None, padding="same",
-                                  depthwise_regularizer=l2(0.001), pointwise_regularizer=l2(0.001)))
-        model.add(BatchNormalization())
-        model.add(LeakyReLU(alpha=0.1))
-        model.add(MaxPool2D(pool_size=(2, 2)))
-        model.add(Dropout(0.3))  # Regularization
-
-        model.add(Flatten())
-        model.add(Dense(128, activation="relu", kernel_regularizer=l2(0.001)))
-        model.add(Dropout(0.5))
-        model.add(Dense(64, activation="relu"))
-        model.add(Dense(26, activation="softmax"))
-
-        model.compile(optimizer=Adam(learning_rate=0.0005), loss="categorical_crossentropy", metrics=["accuracy"])
+        model.compile(optimizer=Adam(learning_rate=0.001), loss="categorical_crossentropy", metrics=["accuracy"])
 
         reduce_lr = ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=2, min_lr=0.00001)
         early_stop = EarlyStopping(monitor="val_loss", patience=5, restore_best_weights=True)
 
         history = model.fit(
-            datagen.flow(x_train, y_train, batch_size=32),
-            epochs=50,
+            datagen.flow(x_train, y_train, batch_size=64),
+            epochs=100,
             callbacks=[reduce_lr, early_stop],
             validation_data=(x_test, y_test)
         )
@@ -149,3 +124,42 @@ def test_model(model):
     
     print(f"Predicted Letter: {letters[predicted_class]}, Confidence: {confidence:.2f}")
     print(f"Actual Label: {letters[test_label]}")
+
+
+def cnn_model():
+    model = Sequential()
+
+    # CNN Model
+    model.add(SeparableConv2D(64, (3, 3), activation=None, padding="same", input_shape=(28, 28, 1)))
+    model.add(BatchNormalization())
+    model.add(LeakyReLU(alpha=0.1))
+    model.add(MaxPool2D(pool_size=(2, 2)))
+
+    model.add(SeparableConv2D(128, (3, 3), activation=None, padding="same",
+                                depthwise_regularizer=l2(0.001), pointwise_regularizer=l2(0.001)))
+    model.add(BatchNormalization())
+    model.add(LeakyReLU(alpha=0.1))
+    model.add(MaxPool2D(pool_size=(2, 2)))
+
+    model.add(SeparableConv2D(256, (3, 3), activation=None, padding="same",
+                                depthwise_regularizer=l2(0.001), pointwise_regularizer=l2(0.001)))
+    model.add(BatchNormalization())
+    model.add(LeakyReLU(alpha=0.1))
+    model.add(MaxPool2D(pool_size=(2, 2)))
+    model.add(Dropout(0.3))  # Regularization
+
+    model.add(Flatten())
+    model.add(Dense(128, activation="relu", kernel_regularizer=l2(0.001)))
+    model.add(Dropout(0.5))
+    model.add(Dense(64, activation="relu"))
+    model.add(Dense(26, activation="softmax"))
+
+    return model
+
+    model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(28, 28, 1)),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(26)
+    ])
+    return model 

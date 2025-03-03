@@ -16,7 +16,7 @@ mplstyle.use('seaborn-v0_8-deep')
 letters = list(string.ascii_uppercase)
 
 # Load Model file or train a new model 
-model = cm.load_or_train_model()
+model = cm.load_or_train_model("cnn")
 
 class DigitRecognizerApp:
     def __init__(self, root):
